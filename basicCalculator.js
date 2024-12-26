@@ -8,6 +8,11 @@ const updateTable = (table, data) => {
   return table;
 };
 
+const logHistory = (table, numOne, numTwo, operation, result) => {
+  const data = [numOne, numTwo, operation || "N/A", result];
+  return updateTable(table, data);
+};
+
 const display = (message) => {
   console.log(message);
 };
@@ -34,17 +39,22 @@ const getInput = (message) => {
 
 const calculate = (numOne, numTwo, operations, history) => {
   const operation = prompt("Enter the operation: ");
-  updateTable(history, [numOne, numTwo, operation]);
 
   if (!(operation in operations)) {
-    return errorMessage("invalidOperation");
+    const error = errorMessage("invalidOperation");
+    logHistory(history, numOne, numTwo, operation, error);
+    return error;
   }
 
   if (operation === "/" && numTwo === 0) {
-    return errorMessage("divideByZero");
+    const error = errorMessage("divideByZero");
+    logHistory(history, numOne, numTwo, operation, error);
+    return error;
   }
 
-  return operations[operation](numOne, numTwo);
+  const output = operations[operation](numOne, numTwo);
+  logHistory(history, numOne, numTwo, operation, output);
+  return output;
 };
 
 const user = (history) => {
@@ -53,8 +63,9 @@ const user = (history) => {
   const numTwo = getInput("Enter the second number: ");
 
   if (isInvalid(numOne) || isInvalid(numTwo)) {
-    updateTable(history, [numOne, numTwo, "Invalid Input"]);
-    return errorMessage("invalidInputs");
+    const error = errorMessage("invalidInputs");
+    logHistory(history, numOne, numTwo, null, error);
+    return error;
   }
 
   return calculate(numOne, numTwo, operations, history);
@@ -68,7 +79,6 @@ const main = () => {
     display("-".repeat(60));
     const result = user(history);
     display(result);
-    history.at(-1).push(result);
     continueToCalculate = confirm("Do you want to calculate again?");
   }
 
